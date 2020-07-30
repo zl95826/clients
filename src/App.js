@@ -58,7 +58,7 @@ class App extends Component {
 
   loginHandler = (event, authData) => {
     event.preventDefault();
-    const graphqlQuery={query:`query{
+    const graphqlQuery={query:`{
       login(email:"${authData.email}",password:"${authData.password}") {
         token
         userId
