@@ -85,6 +85,7 @@ class Feed extends Component {
       })
       .then(resData => {
         if (resData.errors) {throw new Error('Fetching posts failed!');}
+        console.log('load',resData.data.posts.posts);
         this.setState({
           posts: resData.data.posts.posts.map(post => {
             return {
@@ -147,11 +148,26 @@ class Feed extends Component {
       editLoading: true
     });
     const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('content', postData.content);
     formData.append('image', postData.image);
-    let graphqlQuery={query:`mutation{
-  createPost(postInput:{title:"${postData.title}",content:"${postData.content}",imageUrl:"some data"}) {
+    if(this.state.editPost) {
+    	formData.append('oldPath',this.state.editPost.imagePath);
+    }
+    fetch('http://localhost:8080/post-image',{
+    	method:'PUT',
+    	headers:{
+    		Authorization: 'Bearer ' + this.props.token
+        	//'Content-Type':'application/json': remove this, otherwise it will be parsed as json data
+        	//and that does not work for binary data here.
+    	},
+    	body:formData
+    }).then(res=>res.json()).then(fileResData=>{console.log('filePath',fileResData.filePath);
+    //fileResData.filePath is from the server side data
+    	const imageUrl=fileResData.filePath.replace(/\\/g,'/')|| 'undefined';
+    	console.log(imageUrl);
+    	//const imageUrl = fileResData.filePath.replace('\\', '\\\\') || 'undefined'
+    	//**const imageUrl=fileResData.filePath; If you would apply this approach you need to use replace（） in server side
+    	 let graphqlQuery={query:`mutation{
+  createPost(postInput:{title:"${postData.title}",content:"${postData.content}",imageUrl:"${imageUrl}"}) {
     _id
     title
     content
@@ -163,15 +179,15 @@ class Feed extends Component {
   }
 }`}
 
-    fetch('http://localhost:8080/graphql', {
+    return fetch('http://localhost:8080/graphql', {
       method: 'POST',
-      body: JSON.stringify(graphqlQuery),
       headers: {
         Authorization: 'Bearer ' + this.props.token,
         'Content-Type':'application/json'
-      }
+      },
+       body: JSON.stringify(graphqlQuery)
     })
-      .then(res => {
+    }).then(res => {
         return res.json();
       })
       .then(resData => {
@@ -187,7 +203,8 @@ class Feed extends Component {
           title: resData.data.createPost.title,
           content: resData.data.createPost.content,
           creator: resData.data.createPost.creator,
-          createdAt: resData.data.createPost.createdAt
+          createdAt: resData.data.createPost.createdAt,
+          imagePath: resData.data.createPost.imageUrl
         };
         this.setState(prevState => {
           let updatedPosts=[...prevState.posts];
