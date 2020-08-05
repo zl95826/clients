@@ -23,7 +23,7 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/auth/status', {
+   fetch('http://localhost:8080/auth/status', {
       headers: {
         Authorization: 'Bearer ' + this.props.token
       }
@@ -40,7 +40,6 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
-    
   }
 
   
@@ -165,8 +164,8 @@ class Feed extends Component {
     	const imageUrl=fileResData.filePath.replace(/\\/g,'/')|| 'undefined';
     	console.log(imageUrl);
     	//const imageUrl = fileResData.filePath.replace('\\', '\\\\') || 'undefined'
-    	//**const imageUrl=fileResData.filePath; If you would apply this approach you need to use replace（） in server side
-    	 let graphqlQuery={query:`mutation{
+    	//const imageUrl=fileResData.filePath; //If you would apply this approach you need to use replace（） in server side
+    	let graphqlQuery={query:`mutation{
   createPost(postInput:{title:"${postData.title}",content:"${postData.content}",imageUrl:"${imageUrl}"}) {
     _id
     title
