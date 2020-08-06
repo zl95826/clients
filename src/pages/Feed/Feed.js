@@ -159,7 +159,7 @@ class Feed extends Component {
         	//and that does not work for binary data here.
     	},
     	body:formData
-    	//Next request is sent to and processed on the backend side
+    	//Next the request is sent to and processed on the backend side
     }).then(res=>res.json()).then(fileResData=>{console.log('filePath',fileResData.filePath);
     //fileResData.filePath is from the server side data
     	const imageUrl=fileResData.filePath.replace(/\\/g,'/')|| 'undefined';
@@ -256,19 +256,22 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch('http://localhost:8080/feed/post/' + postId, {
-      method: 'DELETE',
+    let graphqlQuery={query:`mutation{
+  deletePost(id:"${postId}")
+}`};
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + this.props.token
-      }
+        Authorization: 'Bearer ' + this.props.token,
+       'Content-Type':'application/json'
+      },
+       body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Deleting a post failed!');
-        }
         return res.json();
       })
       .then(resData => {
+      	if (resData.errors) {throw new Error('Deleting the post failed!');}
         console.log(resData);
         this.loadPosts();
         // this.setState(prevState => {
