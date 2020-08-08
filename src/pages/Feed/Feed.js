@@ -164,10 +164,12 @@ class Feed extends Component {
         	//and that does not work for binary data here.
     	},
     	body:formData
-    	//Next the request is sent to and processed on the backend side
-    }).then(res=>res.json()).then(fileResData=>{console.log('filePath',fileResData.filePath);
-    //fileResData.filePath is from the server side data
-    	const imageUrl=fileResData.filePath.replace(/\\/g,'/')|| 'undefined';
+    	//Next the PUT request is sent to and processed on the backend side
+    }).then(res=>res.json()).then(fileResData=>{console.log('filePath',fileResData);
+    //fileResData.filePath is from the server side data: app.js line 64
+    	let imageUrl = fileResData.filePath;
+    	if(imageUrl) {imageUrl=imageUrl.replace(/\\/g,'/');}
+    	//const imageUrl=fileResData.filePath.replace(/\\/g,'/')|| 'undefined';
     	console.log(imageUrl);
     	//const imageUrl = fileResData.filePath.replace('\\', '\\\\') || 'undefined'
     	//const imageUrl=fileResData.filePath; //If you would apply this approach you need to use replace（） in server side
@@ -205,7 +207,7 @@ class Feed extends Component {
         'Content-Type':'application/json'
       },
        body: JSON.stringify(graphqlQuery)
-    })
+    })//graphQL works on the POST request
     }).then(res => {
         return res.json();
       })
@@ -218,7 +220,7 @@ class Feed extends Component {
         if (resData.errors) {throw new Error('Add post failed!');}
         console.log(resData);
         let resDataField='createPost';
-        if(this.state.editPost) {resDataField='updatePost'}
+        if(this.state.editPost) {resDataField='updatePost';}
         const post = {
           _id: resData.data[resDataField]._id,
           title: resData.data[resDataField].title,
